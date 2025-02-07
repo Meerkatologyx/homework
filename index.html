@@ -8,28 +8,17 @@
   <!-- FullCalendar CSS -->
   <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet" />
   <style>
-    /* Hide both views by default */
-    #dashboardView, #calendarView {
-      display: none;
-    }
-    /* When active, show with appropriate layout */
-    #dashboardView.active {
-      display: grid;
-      gap: 24px;
-      margin-top: 20px;
-    }
-    #calendarView.active {
-      display: block;
-    }
+    /* ========= Global & iOS-like Styles ========= */
 
-    /* Global Styles */
+    /* Reset & System Fonts (San Francisco on iOS) */
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     }
     :root {
+      /* iOS‑inspired dark mode colors */
       --primary: #0a84ff;
       --background: #000;
       --surface: #1c1c1e;
@@ -41,14 +30,37 @@
       background: var(--background);
       color: var(--text);
       min-height: 100vh;
+      -webkit-overflow-scrolling: touch;
     }
     .container {
       max-width: 768px;
       margin: 0 auto;
       padding: 20px;
-      padding-bottom: 80px;
+      padding-bottom: 100px; /* leave room for the nav bar */
     }
-    /* Header with Add Class and Edit Classes options */
+    button, select, input {
+      -webkit-appearance: none;
+      border: none;
+      outline: none;
+    }
+    button:active, .add-btn:active, .complete-btn:active {
+      transform: scale(0.98);
+    }
+
+    /* ========= Views ========= */
+    #dashboardView, #calendarView {
+      display: none;
+    }
+    #dashboardView.active {
+      display: grid;
+      gap: 24px;
+      margin-top: 20px;
+    }
+    #calendarView.active {
+      display: block;
+    }
+
+    /* ========= Header ========= */
     .header {
       display: flex;
       justify-content: space-between;
@@ -61,12 +73,10 @@
       font-weight: 800;
       letter-spacing: -0.5px;
     }
-    /* Wrap the two class-related actions */
     .class-actions {
       display: flex;
       align-items: center;
     }
-    /* Shrunk Add Class button */
     #addClassButton {
       background: var(--primary);
       border: none;
@@ -78,7 +88,6 @@
       font-weight: 600;
       white-space: nowrap;
     }
-    /* Shrunk Edit Classes link styled as blue text */
     #editClassesButton {
       color: var(--primary);
       cursor: pointer;
@@ -87,14 +96,15 @@
       text-decoration: underline;
       white-space: nowrap;
     }
-    /* Dashboard Layout */
-    .due-section {
+
+    /* ========= Dashboard Sections ========= */
+    .due-section, .late-section, .all-homework-section {
       background: var(--surface);
       border-radius: 16px;
       padding: 16px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     }
-    .due-section h3 {
+    .due-section h3, .all-homework-section h3 {
       font-size: 18px;
       margin-bottom: 16px;
       color: var(--primary);
@@ -102,16 +112,16 @@
       align-items: center;
       gap: 8px;
     }
-    .due-section h3::before {
-      content: '📅';
+    .due-section h3::before, .all-homework-section h3::before {
       font-size: 16px;
     }
-    /* Late Section Styling */
+    .due-section h3::before {
+      content: '📅';
+    }
+    .all-homework-section h3::before {
+      content: '📚';
+    }
     .late-section {
-      background: var(--surface);
-      border-radius: 16px;
-      padding: 16px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
       margin-bottom: 24px;
     }
     .late-section h3 {
@@ -126,22 +136,6 @@
       content: '⚠️';
       font-size: 16px;
     }
-    /* All Homework Section */
-    .all-homework-section {
-      margin-top: 12px;
-    }
-    .all-homework-section h3 {
-      font-size: 18px;
-      margin-bottom: 16px;
-      color: var(--text);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .all-homework-section h3::before {
-      content: '📚';
-      font-size: 16px;
-    }
     .homework-grid, .homework-list {
       display: grid;
       gap: 12px;
@@ -153,13 +147,12 @@
       border-left: 4px solid var(--primary);
       transition: transform 0.2s, box-shadow 0.2s;
     }
-    /* When inside the late section, override the left border color */
     .late-section .homework-card {
       border-left: 4px solid red;
     }
     .homework-card:hover {
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(10, 132, 255, 0.1);
+      box-shadow: 0 4px 12px rgba(10,132,255,0.1);
     }
     .homework-card h3 {
       font-size: 16px;
@@ -181,13 +174,14 @@
       padding: 32px 0;
       color: var(--secondary-text);
     }
-    /* Calendar Styles */
+
+    /* ========= Calendar Styles ========= */
     #calendar {
       background: var(--surface);
       border-radius: 14px;
       padding: 10px;
       margin-top: 20px;
-      height: 500px;  /* Reduced height for smaller screens */
+      height: 500px;
     }
     .fc {
       font-size: 12px;
@@ -202,7 +196,6 @@
       padding: 4px;
       margin-bottom: 12px;
     }
-    /* Override FullCalendar Button Styles to Match Theme */
     .fc-button {
       background-color: var(--primary) !important;
       border: none !important;
@@ -223,11 +216,9 @@
       background-color: var(--primary) !important;
       color: var(--text) !important;
     }
-    /* Override today's cell styling */
     .fc-day-today {
       background-color: #3a3a3a !important;
     }
-    /* Custom Homework Bubble for Calendar Cells */
     .homework-bubble {
       position: absolute;
       top: 4px;
@@ -243,7 +234,8 @@
       justify-content: center;
       cursor: pointer;
     }
-    /* Modal Styles */
+
+    /* ========= Modal (Bottom Sheet) Styles ========= */
     .modal {
       display: none;
       position: fixed;
@@ -254,6 +246,11 @@
       background: rgba(0, 0, 0, 0.5);
       backdrop-filter: blur(8px);
       z-index: 10;
+      transition: opacity 0.3s;
+    }
+    .modal.active {
+      display: block;
+      opacity: 1;
     }
     .modal-content {
       position: fixed;
@@ -264,25 +261,42 @@
       border-radius: 24px 24px 0 0;
       padding: 24px;
       transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      /* Initially hidden (translated down) */
+      transform: translateY(100%);
+    }
+    /* When the modal is active, slide the content up */
+    .modal.active .modal-content {
+      transform: translateY(0);
+    }
+    .modal-handle {
+      width: 40px;
+      height: 5px;
+      background: #ccc;
+      border-radius: 2.5px;
+      margin: 0 auto 16px;
     }
     .modal-header h2 {
       font-size: 24px;
       margin-bottom: 24px;
+      text-align: center;
     }
     .input-group {
       margin-bottom: 20px;
     }
-    /* Increase input font size to 16px to prevent iOS zooming */
+    .input-group label {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 6px;
+    }
     .input-field {
       width: 100%;
-      padding: 8px;
+      padding: 12px 8px;
       background: var(--secondary-surface);
       border: none;
-      border-radius: 10px;
+      border-radius: 12px;
       color: var(--text);
       font-size: 16px;
     }
-    /* Style buttons inside modals to match the theme */
     .modal .modal-content button {
       background: var(--primary);
       color: var(--text);
@@ -292,11 +306,16 @@
       font-size: 14px;
       cursor: pointer;
       font-weight: 600;
+      width: 100%;
+      margin-top: 10px;
     }
     .modal .modal-content button:hover {
       filter: brightness(110%);
     }
-    /* Style the Mark Complete button like the theme */
+    .button-group {
+      display: inline-flex;
+      gap: 5px;
+    }
     .complete-btn {
       background: var(--primary);
       border: none;
@@ -310,18 +329,18 @@
     .complete-btn:hover {
       filter: brightness(110%);
     }
-    /* Red Mark Complete button in the Late Section */
     .late-section .complete-btn {
       background: red;
     }
-    /* Navigation Bar */
+
+    /* ========= Navigation Bar ========= */
     .nav-bar {
       position: fixed;
       bottom: 0;
       left: 0;
       right: 0;
       background: var(--surface);
-      padding: 12px 0;
+      padding: 12px 0 20px; /* extra bottom padding for safe area */
       display: flex;
       border-top: 0.5px solid #38383a;
       backdrop-filter: blur(20px);
@@ -341,7 +360,8 @@
       color: var(--primary);
       background: rgba(10, 132, 255, 0.1);
     }
-    /* Plus Button */
+
+    /* ========= Floating Plus Button ========= */
     .add-btn {
       position: fixed;
       bottom: 70px;
@@ -360,16 +380,16 @@
       font-size: 32px;
       padding: 0;
       line-height: normal;
+      transition: transform 0.2s;
     }
-    /* Button group to align Save and Delete buttons next to each other */
-    .button-group {
-      display: inline-flex;
-      gap: 5px;
+    .add-btn:active {
+      transform: scale(0.95);
     }
   </style>
 </head>
 <body>
   <div class="container">
+    <!-- Header -->
     <div class="header">
       <h1>Homework</h1>
       <div class="class-actions">
@@ -380,7 +400,7 @@
 
     <!-- Dashboard View (active by default) -->
     <div id="dashboardView" class="active">
-      <!-- Late Section: Only shown if there is overdue work -->
+      <!-- Late Section (only shown if overdue work exists) -->
       <div class="late-section" id="lateSection" style="display: none;">
         <h3>Late</h3>
         <div class="homework-grid" id="lateHomework"></div>
@@ -404,9 +424,10 @@
       <div id="calendar"></div>
     </div>
 
-    <!-- Plus Button -->
+    <!-- Floating Plus Button -->
     <button class="add-btn" onclick="showModal()">+</button>
     
+    <!-- Navigation Bar -->
     <div class="nav-bar">
       <div class="nav-item active" onclick="switchView('dashboard')">📚 Dashboard</div>
       <div class="nav-item" onclick="switchView('calendar')">📅 Calendar</div>
@@ -420,17 +441,17 @@
           <h2>New Homework</h2>
         </div>
         <div class="input-group">
-          <label>Class</label>
+          <label for="homeworkClass">Class</label>
           <select class="input-field ios-select" id="homeworkClass">
             <option value="">Select Class</option>
           </select>
         </div>
         <div class="input-group">
-          <label>Assignment</label>
+          <label for="homeworkName">Assignment</label>
           <input type="text" class="input-field" id="homeworkName" placeholder="Enter homework name">
         </div>
         <div class="input-group">
-          <label>Due Date</label>
+          <label for="homeworkDue">Due Date</label>
           <input type="datetime-local" class="input-field" id="homeworkDue">
         </div>
         <button onclick="addHomework()">Add Homework</button>
@@ -445,7 +466,7 @@
           <h2>New Class</h2>
         </div>
         <div class="input-group">
-          <label>Class Name</label>
+          <label for="className">Class Name</label>
           <input type="text" class="input-field" id="className" placeholder="Enter class name">
         </div>
         <button onclick="createClass()">Add Class</button>
@@ -487,7 +508,7 @@
       const calendarEl = document.getElementById('calendar');
       calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: 'dayGridMonth',
-        eventDisplay: 'none', // Hide default event text
+        eventDisplay: 'none',
         headerToolbar: {
           left: '',
           center: 'title',
@@ -502,7 +523,6 @@
         fixedWeekCount: false,
         dayMaxEvents: 2,
         eventBorderColor: 'transparent',
-        // Render homework bubble on each day cell
         dayCellDidMount: function(arg) {
           let dateStr = arg.date.toISOString().split('T')[0];
           let count = homework.filter(hw => hw.due.split('T')[0] === dateStr).length;
@@ -510,7 +530,6 @@
             let bubble = document.createElement('div');
             bubble.className = 'homework-bubble';
             bubble.innerText = count;
-            // When the bubble is clicked, show the assignments due on that day
             bubble.addEventListener('click', function(e) {
               e.stopPropagation();
               showDayAssignments(dateStr);
@@ -564,7 +583,7 @@
       }
     }
 
-    // Modal handling for Homework and Class modals
+    /* ===== Modal Handling ===== */
     document.getElementById('modal').addEventListener('click', function(e) {
       if (e.target === this) hideModal();
     });
@@ -579,31 +598,37 @@
     });
 
     function showModal() {
-      document.getElementById('modal').style.display = 'block';
-      setTimeout(() => document.getElementById('modal').classList.add('active'), 10);
+      const modalEl = document.getElementById('modal');
+      modalEl.style.display = 'block';
+      setTimeout(() => modalEl.classList.add('active'), 10);
     }
     function hideModal() {
-      document.getElementById('modal').classList.remove('active');
-      setTimeout(() => document.getElementById('modal').style.display = 'none', 300);
+      const modalEl = document.getElementById('modal');
+      modalEl.classList.remove('active');
+      setTimeout(() => modalEl.style.display = 'none', 300);
     }
     function showClassModal() {
-      document.getElementById('classModal').style.display = 'block';
-      setTimeout(() => document.getElementById('classModal').classList.add('active'), 10);
+      const modalEl = document.getElementById('classModal');
+      modalEl.style.display = 'block';
+      setTimeout(() => modalEl.classList.add('active'), 10);
     }
     function hideClassModal() {
-      document.getElementById('classModal').classList.remove('active');
-      setTimeout(() => document.getElementById('classModal').style.display = 'none', 300);
+      const modalEl = document.getElementById('classModal');
+      modalEl.classList.remove('active');
+      setTimeout(() => modalEl.style.display = 'none', 300);
     }
 
-    // Functions for Edit Classes Modal
+    /* ===== Edit Classes Modal ===== */
     function showEditClassesModal() {
-      document.getElementById('editClassesModal').style.display = 'block';
-      setTimeout(() => document.getElementById('editClassesModal').classList.add('active'), 10);
+      const modalEl = document.getElementById('editClassesModal');
+      modalEl.style.display = 'block';
+      setTimeout(() => modalEl.classList.add('active'), 10);
       renderEditClassesList();
     }
     function hideEditClassesModal() {
-      document.getElementById('editClassesModal').classList.remove('active');
-      setTimeout(() => document.getElementById('editClassesModal').style.display = 'none', 300);
+      const modalEl = document.getElementById('editClassesModal');
+      modalEl.classList.remove('active');
+      setTimeout(() => modalEl.style.display = 'none', 300);
     }
     function renderEditClassesList() {
       const editListEl = document.getElementById('editClassesList');
@@ -623,7 +648,6 @@
       if(newName && newName !== classes[index].name) {
         let oldName = classes[index].name;
         classes[index].name = newName;
-        // Update any homework items that used the old class name
         homework.forEach(hw => {
           if(hw.class === oldName) {
             hw.class = newName;
@@ -642,7 +666,6 @@
         let className = classes[index].name;
         classes.splice(index, 1);
         localStorage.setItem('classes', JSON.stringify(classes));
-        // Update homework: remove the class name from any homework items
         homework.forEach(hw => {
           if(hw.class === className) {
             hw.class = "";
@@ -656,7 +679,7 @@
       }
     }
 
-    // Class Management for Adding New Classes
+    /* ===== Class Management ===== */
     function addClass(name) {
       classes.push({ name, color: `hsl(${Math.random() * 360}, 70%, 60%)` });
       localStorage.setItem('classes', JSON.stringify(classes));
@@ -673,7 +696,7 @@
         classes.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
     }
 
-    // Homework Management
+    /* ===== Homework Management ===== */
     function addHomework() {
       const homeworkItem = {
         class: document.getElementById('homeworkClass').value,
@@ -745,16 +768,11 @@
       dueTodayEmpty.style.display = dueTodayCount > 0 ? 'none' : 'block';
       homeworkEmpty.style.display = homework.length > 0 ? 'none' : 'block';
 
-      if (lateCards.trim() !== "") {
-         lateSection.style.display = 'block';
-      } else {
-         lateSection.style.display = 'none';
-      }
+      lateSection.style.display = lateCards.trim() !== "" ? 'block' : 'none';
     }
 
-    // Functions for Day Assignments Modal
+    /* ===== Day Assignments Modal ===== */
     function showDayAssignments(dateStr) {
-      // Get assignments due on this day
       let assignments = homework.filter(hw => hw.due.split('T')[0] === dateStr);
       document.getElementById("dayAssignmentsDate").innerText = dateStr;
       let html = "";
@@ -774,12 +792,14 @@
         });
       }
       document.getElementById("dayAssignmentsList").innerHTML = html;
-      document.getElementById("dayAssignmentsModal").style.display = "block";
-      setTimeout(() => document.getElementById("dayAssignmentsModal").classList.add("active"), 10);
+      const modalEl = document.getElementById("dayAssignmentsModal");
+      modalEl.style.display = "block";
+      setTimeout(() => modalEl.classList.add("active"), 10);
     }
     function hideDayAssignmentsModal() {
-      document.getElementById("dayAssignmentsModal").classList.remove("active");
-      setTimeout(() => document.getElementById("dayAssignmentsModal").style.display = "none", 300);
+      const modalEl = document.getElementById("dayAssignmentsModal");
+      modalEl.classList.remove("active");
+      setTimeout(() => modalEl.style.display = "none", 300);
     }
 
     // Initialize
@@ -787,7 +807,6 @@
     updateHomeworkDisplay();
     switchView('dashboard');
 
-    // Add event listeners for modals already declared above.
     document.getElementById('editClassesButton').addEventListener('click', showEditClassesModal);
     document.getElementById('addClassButton').addEventListener('click', showClassModal);
   </script>
