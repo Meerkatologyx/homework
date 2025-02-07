@@ -731,11 +731,13 @@
           </div>
         `;
         homeworkCards += card;
-        if (dueTime < now) {
-          lateCards += card;
-        } else if (dueTime.toISOString().split('T')[0] === todayStr) {
+        // Get only the date portion of the due time
+        const hwDate = dueTime.toISOString().split('T')[0];
+        if (hwDate === todayStr) {
           dueTodayCards += card;
           dueTodayCount++;
+        } else if (hwDate < todayStr) {
+          lateCards += card;
         }
       });
 
