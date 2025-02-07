@@ -699,6 +699,9 @@
         updateCalendarBubbles();
       }
     }
+    // This function now checks each homework item:
+    // • If the homework is due today and its due time is still in the future, it is shown in "Due Today."
+    // • If its due time has passed (or the due date is before today), it is shown in "Late."
     function updateHomeworkDisplay() {
       const homeworkListEl = document.getElementById('homeworkList');
       const dueTodayEl = document.getElementById('dueToday');
@@ -731,11 +734,16 @@
           </div>
         `;
         homeworkCards += card;
-        // Get only the date portion of the due time
         const hwDate = dueTime.toISOString().split('T')[0];
         if (hwDate === todayStr) {
-          dueTodayCards += card;
-          dueTodayCount++;
+          // If the due time is still in the future, show in Due Today;
+          // otherwise, if it has passed, mark it as late.
+          if (dueTime > now) {
+            dueTodayCards += card;
+            dueTodayCount++;
+          } else {
+            lateCards += card;
+          }
         } else if (hwDate < todayStr) {
           lateCards += card;
         }
@@ -746,7 +754,6 @@
       lateHomeworkEl.innerHTML = lateCards;
       dueTodayEmpty.style.display = dueTodayCount > 0 ? 'none' : 'block';
       homeworkEmpty.style.display = homework.length > 0 ? 'none' : 'block';
-
       if (lateCards.trim() !== "") {
          lateSection.style.display = 'block';
       } else {
@@ -784,7 +791,7 @@
       setTimeout(() => document.getElementById("dayAssignmentsModal").style.display = "none", 300);
     }
 
-    // Initialize
+    // Initialize everything
     updateClassList();
     updateHomeworkDisplay();
     switchView('dashboard');
@@ -792,6 +799,15 @@
     // Add event listeners for modals already declared above.
     document.getElementById('editClassesButton').addEventListener('click', showEditClassesModal);
     document.getElementById('addClassButton').addEventListener('click', showClassModal);
+
+    // Set an interval to automatically update the homework display and calendar bubbles every minute.
+    setInterval(() => {
+      updateHomeworkDisplay();
+      if (calendar) {
+        calendar.refetchEvents();
+        updateCalendarBubbles();
+      }
+    }, 60000);
   </script>
 </body>
 </html>
