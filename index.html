@@ -699,7 +699,7 @@
         updateCalendarBubbles();
       }
     }
-    // Updated Homework Display function using local date components
+    // Updated Homework Display function that marks assignments as late if their full due datetime is past
     function updateHomeworkDisplay() {
       const homeworkListEl = document.getElementById('homeworkList');
       const dueTodayEl = document.getElementById('dueToday');
@@ -712,7 +712,6 @@
       let dueTodayCards = "";
       let lateCards = "";
       const now = new Date();
-
       let dueTodayCount = 0;
 
       homework.forEach((hw, index) => {
@@ -732,23 +731,19 @@
           </div>
         `;
         homeworkCards += card;
-
-        // Compare using local date parts
-        if (
+        
+        // If the homework's due datetime is in the past, mark it as late.
+        if (dueTime < now) {
+          lateCards += card;
+        }
+        // Otherwise, if it’s due later today, show it in Due Today.
+        else if (
           dueTime.getFullYear() === now.getFullYear() &&
           dueTime.getMonth() === now.getMonth() &&
           dueTime.getDate() === now.getDate()
         ) {
           dueTodayCards += card;
           dueTodayCount++;
-        } else if (
-          dueTime.getFullYear() < now.getFullYear() ||
-          (dueTime.getFullYear() === now.getFullYear() && dueTime.getMonth() < now.getMonth()) ||
-          (dueTime.getFullYear() === now.getFullYear() &&
-           dueTime.getMonth() === now.getMonth() &&
-           dueTime.getDate() < now.getDate())
-        ) {
-          lateCards += card;
         }
       });
 
