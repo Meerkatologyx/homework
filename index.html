@@ -89,6 +89,27 @@
       content: '📅';
       font-size: 16px;
     }
+    /* Late Section Styling */
+    .late-section {
+      background: var(--surface);
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      margin-bottom: 24px;
+    }
+    .late-section h3 {
+      font-size: 18px;
+      margin-bottom: 16px;
+      color: red;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .late-section h3::before {
+      content: '⚠️';
+      font-size: 16px;
+    }
+    /* All Homework Section */
     .all-homework-section {
       margin-top: 12px;
     }
@@ -104,7 +125,7 @@
       content: '📚';
       font-size: 16px;
     }
-    .homework-grid {
+    .homework-grid, .homework-list {
       display: grid;
       gap: 12px;
     }
@@ -114,6 +135,10 @@
       border-radius: 12px;
       border-left: 4px solid var(--primary);
       transition: transform 0.2s, box-shadow 0.2s;
+    }
+    /* When inside the late section, override the left border color */
+    .late-section .homework-card {
+      border-left: 4px solid red;
     }
     .homework-card:hover {
       transform: translateY(-2px);
@@ -222,7 +247,6 @@
       width: 18px;
       height: 18px;
       border-radius: 50%;
-      /* Keep the number’s font size the same (10px) */
       font-size: 10px;
       display: flex;
       align-items: center;
@@ -295,6 +319,10 @@
     .complete-btn:hover {
       filter: brightness(110%);
     }
+    /* Red Mark Complete button in the Late Section */
+    .late-section .complete-btn {
+      background: red;
+    }
     /* Navigation Bar */
     .nav-bar {
       position: fixed;
@@ -302,19 +330,21 @@
       left: 0;
       right: 0;
       background: var(--surface);
-      padding: 12px 20px;
+      padding: 12px 0;
       display: flex;
-      justify-content: space-between;
       border-top: 0.5px solid #38383a;
       backdrop-filter: blur(20px);
     }
     .nav-item {
-      padding: 6px;
-      border-radius: 8px;
-      transition: background 0.2s;
+      flex: 1;
+      text-align: center;
+      padding: 12px 0;
       color: var(--secondary-text);
       cursor: pointer;
       font-size: 12px;
+    }
+    .nav-item:not(:first-child) {
+      border-left: 1px solid #38383a;
     }
     .nav-item.active {
       color: var(--primary);
@@ -350,6 +380,12 @@
 
     <!-- Dashboard View (active by default) -->
     <div id="dashboardView" class="active">
+      <!-- Late Section: Only shown if there is overdue work -->
+      <div class="late-section" id="lateSection" style="display: none;">
+        <h3>Late</h3>
+        <div class="homework-grid" id="lateHomework"></div>
+      </div>
+
       <div class="due-section">
         <h3>Due Today</h3>
         <div class="homework-grid" id="dueToday"></div>
@@ -441,7 +477,7 @@
         fixedWeekCount: false,
         dayMaxEvents: 2,
         eventBorderColor: 'transparent',
-        // Add a custom bubble to each day cell if homework exists that day
+        // Initial bubble rendering on each day cell
         dayCellDidMount: function(arg) {
           let dateStr = arg.date.toISOString().split('T')[0];
           let count = homework.filter(hw => hw.due.split('T')[0] === dateStr).length;
@@ -449,7 +485,6 @@
             let bubble = document.createElement('div');
             bubble.className = 'homework-bubble';
             bubble.innerText = count;
-            // Ensure the cell is positioned relatively so the bubble is placed correctly
             arg.el.style.position = 'relative';
             arg.el.appendChild(bubble);
           }
@@ -458,11 +493,29 @@
       calendar.render();
     }
 
+    // Update the homework bubbles without reinitializing the calendar.
+    function updateCalendarBubbles() {
+      if (!calendar) return;
+      const dayCells = document.querySelectorAll('.fc-daygrid-day');
+      dayCells.forEach(cell => {
+        const oldBubble = cell.querySelector('.homework-bubble');
+        if(oldBubble) oldBubble.remove();
+        const dateStr = cell.getAttribute('data-date');
+        if (!dateStr) return;
+        const count = homework.filter(hw => hw.due.split('T')[0] === dateStr).length;
+        if(count > 0) {
+          const bubble = document.createElement('div');
+          bubble.className = 'homework-bubble';
+          bubble.innerText = count;
+          cell.style.position = 'relative';
+          cell.appendChild(bubble);
+        }
+      });
+    }
+
     function switchView(view) {
-      // Remove active class from both views
       document.getElementById('dashboardView').classList.remove('active');
       document.getElementById('calendarView').classList.remove('active');
-      // Remove active class from nav items
       document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
 
       if (view === 'dashboard') {
@@ -472,10 +525,10 @@
         document.getElementById('calendarView').classList.add('active');
         document.querySelector('.nav-item[onclick="switchView(\'calendar\')"]').classList.add('active');
         if (!calendar) initializeCalendar();
+        updateCalendarBubbles();
       }
     }
 
-    // Modal Handling
     document.getElementById('modal').addEventListener('click', function(e) {
       if (e.target === this) hideModal();
     });
@@ -503,7 +556,6 @@
 
     document.getElementById('addClassButton').addEventListener('click', showClassModal);
 
-    // Class Management
     function addClass(name) {
       classes.push({ name, color: `hsl(${Math.random() * 360}, 70%, 60%)` });
       localStorage.setItem('classes', JSON.stringify(classes));
@@ -540,7 +592,6 @@
       renderClassList();
     }
 
-    // Homework Management
     function addHomework() {
       const homeworkItem = {
         class: document.getElementById('homeworkClass').value,
@@ -551,7 +602,10 @@
       homework.push(homeworkItem);
       localStorage.setItem('homework', JSON.stringify(homework));
       updateHomeworkDisplay();
-      if (calendar) calendar.refetchEvents();
+      if (calendar) {
+        calendar.refetchEvents();
+        updateCalendarBubbles();
+      }
       hideModal();
     }
 
@@ -559,7 +613,10 @@
       homework.splice(index, 1);
       localStorage.setItem('homework', JSON.stringify(homework));
       updateHomeworkDisplay();
-      if (calendar) calendar.refetchEvents();
+      if (calendar) {
+        calendar.refetchEvents();
+        updateCalendarBubbles();
+      }
     }
 
     function updateHomeworkDisplay() {
@@ -567,18 +624,23 @@
       const dueTodayEl = document.getElementById('dueToday');
       const dueTodayEmpty = document.getElementById('dueTodayEmpty');
       const homeworkEmpty = document.getElementById('homeworkEmpty');
-      
+      const lateSection = document.getElementById('lateSection');
+      const lateHomeworkEl = document.getElementById('lateHomework');
+
       let homeworkCards = "";
       let dueTodayCards = "";
-      const today = new Date().toISOString().split('T')[0];
+      let lateCards = "";
+      const now = new Date();
+      const todayStr = now.toISOString().split('T')[0];
       let dueTodayCount = 0;
 
       homework.forEach((hw, index) => {
+        const dueTime = new Date(hw.due);
         const card = `
           <div class="homework-card">
             <h3>${hw.name}</h3>
             <div class="due-date">
-              ${hw.class} • ${new Date(hw.due).toLocaleDateString('en-US', {
+              ${hw.class} • ${dueTime.toLocaleDateString('en-US', {
                 month: 'short',
                 day: 'numeric',
                 hour: 'numeric',
@@ -589,8 +651,9 @@
           </div>
         `;
         homeworkCards += card;
-        let dueDate = new Date(hw.due).toISOString().split('T')[0];
-        if (dueDate === today) {
+        if (dueTime < now) {
+          lateCards += card;
+        } else if (dueTime.toISOString().split('T')[0] === todayStr) {
           dueTodayCards += card;
           dueTodayCount++;
         }
@@ -598,8 +661,16 @@
 
       homeworkListEl.innerHTML = homeworkCards;
       dueTodayEl.innerHTML = dueTodayCards;
+      lateHomeworkEl.innerHTML = lateCards;
       dueTodayEmpty.style.display = dueTodayCount > 0 ? 'none' : 'block';
       homeworkEmpty.style.display = homework.length > 0 ? 'none' : 'block';
+
+      // Only show the late section if there are any late assignments.
+      if (lateCards.trim() !== "") {
+         lateSection.style.display = 'block';
+      } else {
+         lateSection.style.display = 'none';
+      }
     }
 
     // Initialize
