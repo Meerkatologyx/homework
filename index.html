@@ -187,7 +187,7 @@
       border-radius: 14px;
       padding: 10px;
       margin-top: 20px;
-      height: 500px;  /* Reduced height so it fits better on smaller screens */
+      height: 500px;  /* Reduced height for smaller screens */
     }
     .fc {
       font-size: 12px;
@@ -241,6 +241,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      cursor: pointer;
     }
     /* Modal Styles */
     .modal {
@@ -461,6 +462,17 @@
         <button onclick="hideEditClassesModal()">Close</button>
       </div>
     </div>
+    
+    <!-- Day Assignments Modal -->
+    <div class="modal" id="dayAssignmentsModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Assignments for <span id="dayAssignmentsDate"></span></h2>
+        </div>
+        <div id="dayAssignmentsList"></div>
+        <button onclick="hideDayAssignmentsModal()">Close</button>
+      </div>
+    </div>
   </div>
 
   <!-- FullCalendar JS -->
@@ -498,6 +510,11 @@
             let bubble = document.createElement('div');
             bubble.className = 'homework-bubble';
             bubble.innerText = count;
+            // When the bubble is clicked, show the assignments due on that day
+            bubble.addEventListener('click', function(e) {
+              e.stopPropagation();
+              showDayAssignments(dateStr);
+            });
             arg.el.style.position = 'relative';
             arg.el.appendChild(bubble);
           }
@@ -520,6 +537,10 @@
           const bubble = document.createElement('div');
           bubble.className = 'homework-bubble';
           bubble.innerText = count;
+          bubble.addEventListener('click', function(e) {
+            e.stopPropagation();
+            showDayAssignments(dateStr);
+          });
           cell.style.position = 'relative';
           cell.appendChild(bubble);
         }
@@ -553,6 +574,9 @@
     document.getElementById('editClassesModal').addEventListener('click', function(e) {
       if (e.target === this) hideEditClassesModal();
     });
+    document.getElementById('dayAssignmentsModal').addEventListener('click', function(e) {
+      if (e.target === this) hideDayAssignmentsModal();
+    });
 
     function showModal() {
       document.getElementById('modal').style.display = 'block';
@@ -581,7 +605,6 @@
       document.getElementById('editClassesModal').classList.remove('active');
       setTimeout(() => document.getElementById('editClassesModal').style.display = 'none', 300);
     }
-    // Render the list of classes in the Edit Classes Modal with Save and Delete buttons side by side
     function renderEditClassesList() {
       const editListEl = document.getElementById('editClassesList');
       editListEl.innerHTML = classes.map((cls, i) => `
@@ -594,7 +617,6 @@
         </div>
       `).join('');
     }
-    // Save changes (rename) for a given class
     function saveClassEdit(index) {
       let input = document.getElementById(`editClassInput${index}`);
       let newName = input.value.trim();
@@ -615,7 +637,6 @@
         if(calendar) calendar.refetchEvents();
       }
     }
-    // Delete a class from the Edit Classes Modal
     function deleteClassEdit(index) {
       if(confirm("Are you sure you want to delete this class?")) {
         let className = classes[index].name;
@@ -646,7 +667,6 @@
       if (name) addClass(name);
       hideClassModal();
     }
-    // Update the class select element in the Homework Modal
     function updateClassList() {
       const classSelect = document.getElementById('homeworkClass');
       classSelect.innerHTML = '<option value="">Select Class</option>' + 
@@ -679,7 +699,6 @@
         updateCalendarBubbles();
       }
     }
-    // Update Homework Display (Late, Due Today, All Homework)
     function updateHomeworkDisplay() {
       const homeworkListEl = document.getElementById('homeworkList');
       const dueTodayEl = document.getElementById('dueToday');
@@ -726,7 +745,6 @@
       dueTodayEmpty.style.display = dueTodayCount > 0 ? 'none' : 'block';
       homeworkEmpty.style.display = homework.length > 0 ? 'none' : 'block';
 
-      // Show the Late section only if there are any late assignments.
       if (lateCards.trim() !== "") {
          lateSection.style.display = 'block';
       } else {
@@ -734,14 +752,43 @@
       }
     }
 
+    // Functions for Day Assignments Modal
+    function showDayAssignments(dateStr) {
+      // Get assignments due on this day
+      let assignments = homework.filter(hw => hw.due.split('T')[0] === dateStr);
+      document.getElementById("dayAssignmentsDate").innerText = dateStr;
+      let html = "";
+      if(assignments.length === 0) {
+        html = "<p>No assignments due on this day!</p>";
+      } else {
+        assignments.forEach(hw => {
+          const dueTime = new Date(hw.due);
+          html += `
+            <div class="homework-card" style="margin-bottom: 10px;">
+              <h3>${hw.name}</h3>
+              <div class="due-date">
+                ${hw.class} • ${dueTime.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+              </div>
+            </div>
+          `;
+        });
+      }
+      document.getElementById("dayAssignmentsList").innerHTML = html;
+      document.getElementById("dayAssignmentsModal").style.display = "block";
+      setTimeout(() => document.getElementById("dayAssignmentsModal").classList.add("active"), 10);
+    }
+    function hideDayAssignmentsModal() {
+      document.getElementById("dayAssignmentsModal").classList.remove("active");
+      setTimeout(() => document.getElementById("dayAssignmentsModal").style.display = "none", 300);
+    }
+
     // Initialize
     updateClassList();
     updateHomeworkDisplay();
     switchView('dashboard');
 
-    // Add event listener to the Edit Classes text link
+    // Add event listeners for modals already declared above.
     document.getElementById('editClassesButton').addEventListener('click', showEditClassesModal);
-    // Add event listener to the Add Class button to show the Add Class modal
     document.getElementById('addClassButton').addEventListener('click', showClassModal);
   </script>
 </body>
