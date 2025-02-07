@@ -207,6 +207,27 @@
       background-color: var(--primary) !important;
       color: var(--text) !important;
     }
+    /* Override today's cell styling */
+    .fc-day-today {
+      background-color: #3a3a3a !important;
+    }
+    /* Custom Homework Bubble for Calendar Cells */
+    .homework-bubble {
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      background: var(--primary);
+      color: var(--text);
+      /* Slightly shrink the bubble container */
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      /* Keep the number's font size unchanged */
+      font-size: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
     /* Modal Styles */
     .modal {
       display: none;
@@ -405,6 +426,7 @@
       const calendarEl = document.getElementById('calendar');
       calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: 'dayGridMonth',
+        eventDisplay: 'none', // Hide default event text
         headerToolbar: {
           left: 'prev,title,next',
           right: 'today,dayGridMonth,timeGridWeek,timeGridDay'
@@ -417,7 +439,20 @@
         })),
         fixedWeekCount: false,
         dayMaxEvents: 2,
-        eventBorderColor: 'transparent'
+        eventBorderColor: 'transparent',
+        // Add a custom bubble to each day cell if homework exists that day
+        dayCellDidMount: function(arg) {
+          let dateStr = arg.date.toISOString().split('T')[0];
+          let count = homework.filter(hw => hw.due.split('T')[0] === dateStr).length;
+          if(count > 0) {
+            let bubble = document.createElement('div');
+            bubble.className = 'homework-bubble';
+            bubble.innerText = count;
+            // Ensure the cell is positioned relatively so the bubble is placed correctly
+            arg.el.style.position = 'relative';
+            arg.el.appendChild(bubble);
+          }
+        }
       });
       calendar.render();
     }
