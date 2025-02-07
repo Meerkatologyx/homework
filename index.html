@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <!-- The viewport meta tag below is standard. Do not disable user scaling for accessibility reasons -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Homework Tracker</title>
   <!-- FullCalendar CSS -->
@@ -218,11 +219,10 @@
       left: 4px;
       background: var(--primary);
       color: var(--text);
-      /* Slightly shrink the bubble container */
       width: 18px;
       height: 18px;
       border-radius: 50%;
-      /* Keep the number's font size unchanged */
+      /* Keep the number’s font size the same (10px) */
       font-size: 10px;
       display: flex;
       align-items: center;
@@ -257,6 +257,7 @@
     .input-group {
       margin-bottom: 20px;
     }
+    /* Increase input font size to 16px to prevent iOS zooming */
     .input-field {
       width: 100%;
       padding: 8px;
@@ -264,7 +265,7 @@
       border: none;
       border-radius: 10px;
       color: var(--text);
-      font-size: 14px;
+      font-size: 16px;
     }
     /* Style buttons inside modals to match the theme */
     .modal .modal-content button {
