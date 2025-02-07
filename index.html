@@ -187,6 +187,7 @@
       border-radius: 14px;
       padding: 10px;
       margin-top: 20px;
+      height: 600px;  /* Increased height so all days are visible */
     }
     .fc {
       font-size: 12px;
@@ -344,8 +345,8 @@
       position: fixed;
       bottom: 70px;
       right: 20px;
-      width: 40px;
-      height: 40px;
+      width: 50px;
+      height: 50px;
       border-radius: 50%;
       background: var(--primary);
       display: flex;
@@ -355,11 +356,10 @@
       box-shadow: 0 4px 8px rgba(10, 132, 255, 0.3);
       border: none;
       color: white;
-      font-size: 28px;
+      font-size: 32px;
       padding: 0;
-      /* Use flex centering and nudge the plus slightly upward */
       line-height: normal;
-      transform: translateY(-1px);
+      /* Removed any transform so the plus is perfectly centered */
     }
     /* Button group to align Save and Delete buttons next to each other */
     .button-group {
