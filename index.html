@@ -5,11 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Homework Tracker</title>
   <!-- FullCalendar CSS -->
-  <link
-    href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css"
-    rel="stylesheet"
-  />
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet" />
   <style>
+    /* Hide both views by default */
+    #dashboardView, #calendarView {
+      display: none;
+    }
+    /* When active, show with appropriate layout */
+    #dashboardView.active {
+      display: grid;
+      gap: 24px;
+      margin-top: 20px;
+    }
+    #calendarView.active {
+      display: block;
+    }
+
     /* Global Styles */
     * {
       margin: 0;
@@ -40,13 +51,201 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 30px;
+      margin-bottom: 24px;
       padding: 0 10px;
     }
     .header h1 {
-      font-size: 28px;
-      font-weight: 700;
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
     }
+    #addClassButton {
+      background: var(--primary);
+      border: none;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-size: 14px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    /* Dashboard Layout */
+    .due-section {
+      background: var(--surface);
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+    .due-section h3 {
+      font-size: 18px;
+      margin-bottom: 16px;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .due-section h3::before {
+      content: '📅';
+      font-size: 16px;
+    }
+    .all-homework-section {
+      margin-top: 12px;
+    }
+    .all-homework-section h3 {
+      font-size: 18px;
+      margin-bottom: 16px;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .all-homework-section h3::before {
+      content: '📚';
+      font-size: 16px;
+    }
+    .homework-grid {
+      display: grid;
+      gap: 12px;
+    }
+    .homework-card {
+      background: var(--secondary-surface);
+      padding: 18px;
+      border-radius: 12px;
+      border-left: 4px solid var(--primary);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .homework-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(10, 132, 255, 0.1);
+    }
+    .homework-card h3 {
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
+    .due-date {
+      font-size: 13px;
+      color: var(--secondary-text);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .due-date::before {
+      content: '⏰';
+      font-size: 12px;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 32px 0;
+      color: var(--secondary-text);
+    }
+    /* Class List Styling */
+    #classList {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+    .class-chip {
+      background: var(--secondary-surface);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .class-chip button {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 2px;
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      display: grid;
+      place-items: center;
+      border: none;
+      color: var(--text);
+      cursor: pointer;
+    }
+    /* Calendar Styles */
+    #calendar {
+      background: var(--surface);
+      border-radius: 14px;
+      padding: 10px;
+      margin-top: 20px;
+    }
+    .fc {
+      font-size: 12px;
+      background: var(--surface);
+      border: none;
+      color: var(--text);
+    }
+    .fc-header-toolbar {
+      background: var(--secondary-surface);
+      border: none;
+      border-radius: 10px;
+      padding: 4px;
+      margin-bottom: 12px;
+    }
+    /* Override FullCalendar Button Styles to Match Theme */
+    .fc-button {
+      background-color: var(--primary) !important;
+      border: none !important;
+      border-radius: 10px !important;
+      color: var(--text) !important;
+      font-size: 14px;
+      padding: 6px 10px;
+      cursor: pointer;
+    }
+    .fc-button:hover {
+      background-color: var(--primary) !important;
+      filter: brightness(110%);
+    }
+    .fc-button:focus {
+      outline: none;
+    }
+    .fc-button-active {
+      background-color: var(--primary) !important;
+      color: var(--text) !important;
+    }
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(8px);
+      z-index: 10;
+    }
+    .modal-content {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--surface);
+      border-radius: 24px 24px 0 0;
+      padding: 24px;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .modal-header h2 {
+      font-size: 24px;
+      margin-bottom: 24px;
+    }
+    .input-group {
+      margin-bottom: 20px;
+    }
+    .input-field {
+      width: 100%;
+      padding: 8px;
+      background: var(--secondary-surface);
+      border: none;
+      border-radius: 10px;
+      color: var(--text);
+      font-size: 14px;
+    }
+    /* Navigation Bar */
     .nav-bar {
       position: fixed;
       bottom: 0;
@@ -60,239 +259,33 @@
       backdrop-filter: blur(20px);
     }
     .nav-item {
-      padding: 8px;
-      border-radius: 10px;
+      padding: 6px;
+      border-radius: 8px;
       transition: background 0.2s;
       color: var(--secondary-text);
       cursor: pointer;
+      font-size: 12px;
     }
     .nav-item.active {
       color: var(--primary);
       background: rgba(10, 132, 255, 0.1);
     }
-    .view-container {
-      display: none;
-    }
-    .view-container.active {
-      display: block;
-    }
-    .homework-list {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-    .homework-card {
-      background: var(--surface);
-      padding: 16px;
-      border-radius: 14px;
-      position: relative;
-      overflow: hidden;
-      transition: transform 0.2s;
-    }
-    .homework-card:hover {
-      transform: scale(1.02);
-    }
-    .homework-card::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 4px;
-      height: 100%;
-      background: var(--primary);
-    }
-    .due-date {
-      font-size: 14px;
-      color: var(--secondary-text);
-      margin-top: 8px;
-    }
     .add-btn {
       position: fixed;
-      bottom: 90px;
+      bottom: 70px;
       right: 20px;
-      width: 56px;
-      height: 56px;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
       background: var(--primary);
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      box-shadow: 0 6px 12px rgba(10, 132, 255, 0.3);
-      transition: transform 0.2s;
-      font-size: 24px;
+      box-shadow: 0 4px 8px rgba(10, 132, 255, 0.3);
       border: none;
       color: white;
-    }
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      backdrop-filter: blur(8px);
-    }
-    .modal-content {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: var(--surface);
-      border-radius: 24px 24px 0 0;
-      padding: 24px;
-      transform: translateY(100%);
-      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      touch-action: pan-y;
-    }
-    .modal.active .modal-content {
-      transform: translateY(0);
-    }
-    .modal-handle {
-      width: 40px;
-      height: 4px;
-      background: #3a3a3c;
-      border-radius: 2px;
-      position: absolute;
-      top: 12px;
-      left: calc(50% - 20px);
-      touch-action: none;
-    }
-    .input-group {
-      margin-bottom: 20px;
-    }
-    .input-group label {
-      display: block;
-      margin-bottom: 8px;
-      color: var(--secondary-text);
-      font-size: 14px;
-    }
-    .input-field {
-      width: 100%;
-      padding: 12px;
-      background: var(--secondary-surface);
-      border: none;
-      border-radius: 10px;
-      color: var(--text);
-      font-size: 16px;
-    }
-    .ios-select {
-      appearance: none;
-      background: var(--secondary-surface)
-        url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e")
-        no-repeat right 12px center;
-      background-size: 16px;
-    }
-    button {
-      background: var(--primary);
-      border: none;
-      color: var(--text);
-      padding: 10px 16px;
-      border-radius: 10px;
-      font-size: 15px;
-      transition: all 0.2s;
-      cursor: pointer;
-      width: 100%;
-      font-weight: 500;
-    }
-    button:hover {
-      opacity: 0.9;
-    }
-    /* Redesigned FullCalendar Styles */
-    #calendar {
-      background: var(--surface);
-      border-radius: 14px;
-      padding: 10px;
-      margin-top: 20px;
-      border: none !important;
-    }
-    /* General FullCalendar tweaks */
-    .fc {
-      font-size: 14px;
-      background: var(--surface);
-      border: none;
-      color: var(--text);
-    }
-    /* Header Toolbar */
-    .fc-header-toolbar {
-      background: var(--secondary-surface);
-      border: none;
-      border-radius: 10px;
-      padding: 6px;
-      margin-bottom: 12px;
-    }
-    .fc-toolbar-chunk {
-      display: flex;
-      align-items: center;
-    }
-    .fc-toolbar-title {
-      font-size: 18px !important;
-      font-weight: 600 !important;
-      color: var(--text) !important;
-      padding: 0 8px;
-    }
-    /* Button styling */
-    .fc-button {
-      background: transparent !important;
-      border: none !important;
-      color: var(--text) !important;
-      font-size: 14px !important;
-      padding: 4px 6px !important;
-      border-radius: 5px !important;
-      margin: 0 4px;
-      transition: background 0.2s;
-    }
-    .fc-button:hover {
-      background: var(--primary) !important;
-      color: var(--text) !important;
-    }
-    /* Arrow button styling */
-    .fc-prev-button,
-    .fc-next-button {
-      width: 28px !important;
-      height: 28px !important;
-      padding: 0 !important;
-      line-height: 28px !important;
-      font-size: 14px !important;
-      position: relative;
-    }
-    .fc-prev-button::before,
-    .fc-next-button::before {
-      font-size: 14px;
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      color: var(--text);
-    }
-    .fc-prev-button::before {
-      content: '◀';
-    }
-    .fc-next-button::before {
-      content: '▶';
-    }
-    /* Event styling */
-    .fc-event {
-      background: var(--primary) !important;
-      border: none !important;
-      border-radius: 4px !important;
-      font-size: 12px !important;
-      padding: 2px 4px !important;
-      margin: 2px 0;
-    }
-    /* Day grid styling */
-    .fc-daygrid-day {
-      border: none;
-      border-bottom: 1px solid var(--secondary-surface) !important;
-    }
-    .fc-daygrid-day-number {
-      color: var(--text) !important;
-      font-weight: 500;
-      padding: 4px !important;
-    }
-    .fc-day-today {
-      background: rgba(10, 132, 255, 0.15) !important;
+      font-size: 24px;
     }
   </style>
 </head>
@@ -300,24 +293,39 @@
   <div class="container">
     <div class="header">
       <h1>Homework</h1>
+      <button id="addClassButton">Add Class</button>
     </div>
-    <!-- Dashboard View -->
-    <div class="view-container active" id="dashboardView">
-      <div class="due-today">
+    
+    <div id="classList"></div>
+
+    <!-- Dashboard View (active by default) -->
+    <div id="dashboardView" class="active">
+      <div class="due-section">
         <h3>Due Today</h3>
         <div class="homework-grid" id="dueToday"></div>
+        <div class="empty-state" id="dueTodayEmpty" style="display: none;">Nothing due today! 🎉</div>
       </div>
-      <div class="homework-list" id="homeworkList"></div>
+
+      <div class="all-homework-section">
+        <h3>All Homework</h3>
+        <div class="homework-list" id="homeworkList"></div>
+        <div class="empty-state" id="homeworkEmpty" style="display: none;">No homework yet! Click + to add 📝</div>
+      </div>
     </div>
+
     <!-- Calendar View -->
-    <div class="view-container" id="calendarView">
+    <div id="calendarView">
       <div id="calendar"></div>
     </div>
-    <div class="add-btn" onclick="showModal()">+</div>
+
+    <button class="add-btn" onclick="showModal()">+</button>
+    
     <div class="nav-bar">
       <div class="nav-item active" onclick="switchView('dashboard')">📚 Dashboard</div>
       <div class="nav-item" onclick="switchView('calendar')">📅 Calendar</div>
     </div>
+
+    <!-- Homework Modal -->
     <div class="modal" id="modal">
       <div class="modal-content">
         <div class="modal-handle"></div>
@@ -341,17 +349,30 @@
         <button onclick="addHomework()">Add Homework</button>
       </div>
     </div>
+
+    <!-- Class Modal -->
+    <div class="modal" id="classModal">
+      <div class="modal-content">
+        <div class="modal-handle"></div>
+        <div class="modal-header">
+          <h2>New Class</h2>
+        </div>
+        <div class="input-group">
+          <label>Class Name</label>
+          <input type="text" class="input-field" id="className" placeholder="Enter class name">
+        </div>
+        <button onclick="createClass()">Add Class</button>
+      </div>
+    </div>
   </div>
+
   <!-- FullCalendar JS -->
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
   <script>
     let classes = JSON.parse(localStorage.getItem('classes')) || [];
     let homework = JSON.parse(localStorage.getItem('homework')) || [];
-    let touchStartY = 0;
-    const modalContent = document.querySelector('.modal-content');
-    let calendar; // Store calendar instance
+    let calendar;
 
-    // Initialize Calendar with our redesigned header
     function initializeCalendar() {
       const calendarEl = document.getElementById('calendar');
       calendar = new FullCalendar.Calendar(calendarEl, {
@@ -360,7 +381,6 @@
           left: 'prev,title,next',
           right: 'today,dayGridMonth,timeGridWeek,timeGridDay'
         },
-        themeSystem: 'bootstrap',
         events: homework.map(hw => ({
           title: hw.name,
           start: hw.due,
@@ -374,10 +394,13 @@
       calendar.render();
     }
 
-    // View Switching
     function switchView(view) {
-      document.querySelectorAll('.view-container').forEach(v => v.classList.remove('active'));
+      // Remove active class from both views
+      document.getElementById('dashboardView').classList.remove('active');
+      document.getElementById('calendarView').classList.remove('active');
+      // Remove active class from nav items
       document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
       if (view === 'dashboard') {
         document.getElementById('dashboardView').classList.add('active');
         document.querySelector('.nav-item[onclick="switchView(\'dashboard\')"]').classList.add('active');
@@ -388,63 +411,69 @@
       }
     }
 
-    // Modal Swipe & Drag to Close
-    modalContent.addEventListener('touchstart', e => {
-      touchStartY = e.touches[0].clientY;
+    // Modal Handling
+    document.getElementById('modal').addEventListener('click', function(e) {
+      if (e.target === this) hideModal();
     });
-    modalContent.addEventListener('touchmove', e => {
-      const touchY = e.touches[0].clientY;
-      const deltaY = touchY - touchStartY;
-      if (deltaY > 0) {
-        e.currentTarget.style.transform = `translateY(${deltaY}px)`;
-      }
+    document.getElementById('classModal').addEventListener('click', function(e) {
+      if (e.target === this) hideClassModal();
     });
-    modalContent.addEventListener('touchend', e => {
-      const touchEndY = e.changedTouches[0].clientY;
-      const deltaY = touchEndY - touchStartY;
-      if (deltaY > 100) {
-        hideModal();
-      } else {
-        e.currentTarget.style.transform = 'translateY(0)';
-      }
-    });
-    let isDragging = false;
-    let startY = 0;
-    modalContent.addEventListener('mousedown', e => {
-      if (e.target === document.querySelector('.modal-handle')) {
-        isDragging = true;
-        startY = e.clientY;
-        e.preventDefault();
-      }
-    });
-    document.addEventListener('mousemove', e => {
-      if (isDragging) {
-        const deltaY = e.clientY - startY;
-        if (deltaY > 0) {
-          modalContent.style.transform = `translateY(${deltaY}px)`;
-        }
-      }
-    });
-    document.addEventListener('mouseup', e => {
-      if (isDragging) {
-        const deltaY = e.clientY - startY;
-        if (deltaY > 100) {
-          hideModal();
-        } else {
-          modalContent.style.transform = 'translateY(0)';
-        }
-        isDragging = false;
-      }
-    });
+
+    function showModal() {
+      document.getElementById('modal').style.display = 'block';
+      setTimeout(() => document.getElementById('modal').classList.add('active'), 10);
+    }
+    function hideModal() {
+      document.getElementById('modal').classList.remove('active');
+      setTimeout(() => document.getElementById('modal').style.display = 'none', 300);
+    }
+
+    function showClassModal() {
+      document.getElementById('classModal').style.display = 'block';
+      setTimeout(() => document.getElementById('classModal').classList.add('active'), 10);
+    }
+    function hideClassModal() {
+      document.getElementById('classModal').classList.remove('active');
+      setTimeout(() => document.getElementById('classModal').style.display = 'none', 300);
+    }
+
+    document.getElementById('addClassButton').addEventListener('click', showClassModal);
 
     // Class Management
     function addClass(name) {
-      classes.push({
-        name: name,
-        color: `hsl(${Math.random() * 360}, 70%, 60%)`
-      });
+      classes.push({ name, color: `hsl(${Math.random() * 360}, 70%, 60%)` });
       localStorage.setItem('classes', JSON.stringify(classes));
       updateClassList();
+      renderClassList();
+    }
+
+    function createClass() {
+      const name = document.getElementById('className').value.trim();
+      if (name) addClass(name);
+      hideClassModal();
+    }
+
+    function updateClassList() {
+      const classSelect = document.getElementById('homeworkClass');
+      classSelect.innerHTML = '<option value="">Select Class</option>' + 
+        classes.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+    }
+
+    function renderClassList() {
+      const classListEl = document.getElementById('classList');
+      classListEl.innerHTML = classes.map(c => `
+        <div class="class-chip">
+          <span>${c.name}</span>
+          <button onclick="deleteClass('${c.name}')">×</button>
+        </div>
+      `).join('');
+    }
+
+    function deleteClass(className) {
+      classes = classes.filter(c => c.name !== className);
+      localStorage.setItem('classes', JSON.stringify(classes));
+      updateClassList();
+      renderClassList();
     }
 
     // Homework Management
@@ -461,18 +490,27 @@
       if (calendar) calendar.refetchEvents();
       hideModal();
     }
-    function updateClassList() {
-      const classSelect = document.getElementById('homeworkClass');
-      classSelect.innerHTML =
-        '<option value="">Select Class</option>' +
-        classes.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+
+    function completeHomework(index) {
+      homework.splice(index, 1);
+      localStorage.setItem('homework', JSON.stringify(homework));
+      updateHomeworkDisplay();
+      if (calendar) calendar.refetchEvents();
     }
+
     function updateHomeworkDisplay() {
-      const homeworkList = document.getElementById('homeworkList');
-      const dueToday = document.getElementById('dueToday');
+      const homeworkListEl = document.getElementById('homeworkList');
+      const dueTodayEl = document.getElementById('dueToday');
+      const dueTodayEmpty = document.getElementById('dueTodayEmpty');
+      const homeworkEmpty = document.getElementById('homeworkEmpty');
+      
+      let homeworkCards = "";
+      let dueTodayCards = "";
       const today = new Date().toISOString().split('T')[0];
-      homeworkList.innerHTML = homework
-        .map(hw => `
+      let dueTodayCount = 0;
+
+      homework.forEach((hw, index) => {
+        const card = `
           <div class="homework-card">
             <h3>${hw.name}</h3>
             <div class="due-date">
@@ -483,44 +521,27 @@
                 minute: '2-digit'
               })}
             </div>
+            <button class="complete-btn" onclick="completeHomework(${index})">Mark Complete</button>
           </div>
-        `)
-        .join('');
-      dueToday.innerHTML = homework
-        .filter(hw => hw.due.split('T')[0] === today)
-        .map(hw => `
-          <div class="homework-card">
-            <h3>${hw.name}</h3>
-            <div class="due-date">
-              ${hw.class} • ${new Date(hw.due).toLocaleTimeString('en-US', {
-                hour: 'numeric',
-                minute: '2-digit'
-              })}
-            </div>
-          </div>
-        `)
-        .join('');
+        `;
+        homeworkCards += card;
+        if (hw.due.split('T')[0] === today) {
+          dueTodayCards += card;
+          dueTodayCount++;
+        }
+      });
+
+      homeworkListEl.innerHTML = homeworkCards;
+      dueTodayEl.innerHTML = dueTodayCards;
+      dueTodayEmpty.style.display = dueTodayCount > 0 ? 'none' : 'block';
+      homeworkEmpty.style.display = homework.length > 0 ? 'none' : 'block';
     }
-    // Modal Control
-    function showModal() {
-      document.getElementById('modal').classList.add('active');
-      document.getElementById('modal').style.display = 'block';
-      document.getElementById('homeworkName').value = '';
-      document.getElementById('homeworkDue').value = '';
-    }
-    function hideModal() {
-      document.getElementById('modal').classList.remove('active');
-      setTimeout(() => {
-        document.getElementById('modal').style.display = 'none';
-      }, 300);
-    }
-    // Initialize Demo Data
-    if (classes.length === 0) {
-      ['Math 101', 'Physics 202', 'Literature'].forEach(addClass);
-    }
+
+    // Initialize
     updateClassList();
+    renderClassList();
     updateHomeworkDisplay();
-    switchView('dashboard'); // Default view
+    switchView('dashboard');
   </script>
 </body>
 </html>
