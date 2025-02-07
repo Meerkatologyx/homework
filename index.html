@@ -71,21 +71,21 @@
       background: var(--primary);
       border: none;
       color: white;
-      padding: 4px 8px; /* Reduced padding */
+      padding: 4px 8px;
       border-radius: 10px;
-      font-size: 10px; /* Smaller text */
+      font-size: 10px;
       cursor: pointer;
       font-weight: 600;
-      white-space: nowrap; /* Force one line */
+      white-space: nowrap;
     }
     /* Shrunk Edit Classes link styled as blue text */
     #editClassesButton {
       color: var(--primary);
       cursor: pointer;
       margin-left: 10px;
-      font-size: 10px; /* Smaller text */
+      font-size: 10px;
       text-decoration: underline;
-      white-space: nowrap; /* Force one line */
+      white-space: nowrap;
     }
     /* Dashboard Layout */
     .due-section {
@@ -330,7 +330,7 @@
       padding: 12px 0;
       color: var(--secondary-text);
       cursor: pointer;
-      font-size: 16px; /* Increased text size for tabs */
+      font-size: 16px;
     }
     .nav-item:not(:first-child) {
       border-left: 1px solid #38383a;
@@ -339,6 +339,7 @@
       color: var(--primary);
       background: rgba(10, 132, 255, 0.1);
     }
+    /* Plus Button */
     .add-btn {
       position: fixed;
       bottom: 70px;
@@ -354,7 +355,11 @@
       box-shadow: 0 4px 8px rgba(10, 132, 255, 0.3);
       border: none;
       color: white;
-      font-size: 24px;
+      font-size: 28px;
+      padding: 0;
+      /* Use flex centering and nudge the plus slightly upward */
+      line-height: normal;
+      transform: translateY(-1px);
     }
     /* Button group to align Save and Delete buttons next to each other */
     .button-group {
@@ -399,6 +404,7 @@
       <div id="calendar"></div>
     </div>
 
+    <!-- Plus Button -->
     <button class="add-btn" onclick="showModal()">+</button>
     
     <div class="nav-bar">
@@ -472,8 +478,9 @@
         initialView: 'dayGridMonth',
         eventDisplay: 'none', // Hide default event text
         headerToolbar: {
-          left: 'prev,title,next',
-          right: 'today,dayGridMonth,timeGridWeek,timeGridDay'
+          left: '',
+          center: 'title',
+          right: 'prev,next'
         },
         events: homework.map(hw => ({
           title: hw.name,
