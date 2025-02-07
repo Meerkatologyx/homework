@@ -699,7 +699,7 @@
         updateCalendarBubbles();
       }
     }
-    // NEW updateHomeworkDisplay function using manual date formatting
+    // Updated Homework Display function using local date components
     function updateHomeworkDisplay() {
       const homeworkListEl = document.getElementById('homeworkList');
       const dueTodayEl = document.getElementById('dueToday');
@@ -712,23 +712,11 @@
       let dueTodayCards = "";
       let lateCards = "";
       const now = new Date();
-      
-      // Get today's date in local time as YYYY-MM-DD
-      const todayYear = now.getFullYear();
-      const todayMonth = now.getMonth() + 1; // Months are 0-based
-      const todayDay = now.getDate();
-      const todayStr = `${todayYear}-${String(todayMonth).padStart(2, '0')}-${String(todayDay).padStart(2, '0')}`;
-      
+
       let dueTodayCount = 0;
 
       homework.forEach((hw, index) => {
         const dueTime = new Date(hw.due);
-        // Get due date in local time as YYYY-MM-DD
-        const dueYear = dueTime.getFullYear();
-        const dueMonth = dueTime.getMonth() + 1;
-        const dueDay = dueTime.getDate();
-        const dueDateStr = `${dueYear}-${String(dueMonth).padStart(2, '0')}-${String(dueDay).padStart(2, '0')}`;
-
         const card = `
           <div class="homework-card">
             <h3>${hw.name}</h3>
@@ -744,11 +732,23 @@
           </div>
         `;
         homeworkCards += card;
-        if (dueTime < now) {
-          lateCards += card;
-        } else if (dueDateStr === todayStr) {
+
+        // Compare using local date parts
+        if (
+          dueTime.getFullYear() === now.getFullYear() &&
+          dueTime.getMonth() === now.getMonth() &&
+          dueTime.getDate() === now.getDate()
+        ) {
           dueTodayCards += card;
           dueTodayCount++;
+        } else if (
+          dueTime.getFullYear() < now.getFullYear() ||
+          (dueTime.getFullYear() === now.getFullYear() && dueTime.getMonth() < now.getMonth()) ||
+          (dueTime.getFullYear() === now.getFullYear() &&
+           dueTime.getMonth() === now.getMonth() &&
+           dueTime.getDate() < now.getDate())
+        ) {
+          lateCards += card;
         }
       });
 
@@ -758,13 +758,25 @@
       dueTodayEmpty.style.display = dueTodayCount > 0 ? 'none' : 'block';
       homeworkEmpty.style.display = homework.length > 0 ? 'none' : 'block';
 
-      lateSection.style.display = lateCards.trim() ? 'block' : 'none';
+      if (lateCards.trim() !== "") {
+        lateSection.style.display = 'block';
+      } else {
+        lateSection.style.display = 'none';
+      }
     }
 
     // Functions for Day Assignments Modal
     function showDayAssignments(dateStr) {
       // Get assignments due on this day
-      let assignments = homework.filter(hw => hw.due.split('T')[0] === dateStr);
+      let assignments = homework.filter(hw => {
+        const d = new Date(hw.due);
+        const year = d.getFullYear();
+        const month = d.getMonth() + 1;
+        const day = d.getDate();
+        // Build a string in YYYY-MM-DD format for comparison
+        const formatted = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        return formatted === dateStr;
+      });
       document.getElementById("dayAssignmentsDate").innerText = dateStr;
       let html = "";
       if(assignments.length === 0) {
