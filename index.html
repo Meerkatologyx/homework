@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- The viewport meta tag below is standard. Do not disable user scaling for accessibility reasons -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Homework Tracker</title>
   <!-- FullCalendar CSS -->
   <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet" />
@@ -187,7 +187,7 @@
       border-radius: 14px;
       padding: 10px;
       margin-top: 20px;
-      height: 500px;  /* Reduced height for smaller screens */
+      height: 500px;
     }
     .fc {
       font-size: 12px;
@@ -254,6 +254,11 @@
       background: rgba(0, 0, 0, 0.5);
       backdrop-filter: blur(8px);
       z-index: 10;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .modal.active {
+      opacity: 1;
     }
     .modal-content {
       position: fixed;
@@ -325,6 +330,7 @@
       display: flex;
       border-top: 0.5px solid #38383a;
       backdrop-filter: blur(20px);
+      z-index: 5;
     }
     .nav-item {
       flex: 1;
@@ -360,11 +366,49 @@
       font-size: 32px;
       padding: 0;
       line-height: normal;
+      z-index: 6;
     }
     /* Button group to align Save and Delete buttons next to each other */
     .button-group {
       display: inline-flex;
       gap: 5px;
+    }
+    /* Mobile Responsive Styles */
+    @media (max-width: 600px) {
+      .container {
+        padding: 10px;
+        padding-bottom: 70px;
+      }
+      .header h1 {
+        font-size: 24px;
+      }
+      #addClassButton, #editClassesButton {
+        font-size: 8px;
+        padding: 2px 6px;
+      }
+      .nav-item {
+        font-size: 14px;
+        padding: 10px 0;
+      }
+      .add-btn {
+        width: 44px;
+        height: 44px;
+        font-size: 24px;
+        bottom: 60px;
+        right: 16px;
+      }
+      .modal-content {
+        padding: 16px;
+      }
+      .modal-header h2 {
+        font-size: 20px;
+      }
+      .input-field {
+        font-size: 14px;
+      }
+      #calendar {
+        height: 400px;
+      }
     }
   </style>
 </head>
